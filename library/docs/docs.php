@@ -165,17 +165,18 @@ class Docs
 
 		// Basic informations
 		// ================================
-		$fields = 'www_posts.ID as id, www_posts.post_date_gmt as created, www_posts.post_modified_gmt as modified, www_icl_translations.language_code as lang, www_posts.post_title as title';
+		$fields = 'www_posts.ID as id, www_posts.post_type, UNIX_TIMESTAMP(www_posts.post_date_gmt) as created, UNIX_TIMESTAMP(www_posts.post_modified_gmt) as modified, www_icl_translations.language_code as lang, www_posts.post_title as title';
 		if ($full)
 			$fields .= ', www_posts.post_content as body';
 		$query = 'SELECT ' . $fields . '
 					FROM www_posts
 						LEFT JOIN www_icl_translations ON www_icl_translations.element_id = www_posts.ID
-					WHERE www_icl_translations.element_type = :element_type
+					WHERE (www_posts.post_type = :post OR www_posts.post_type = :page)
 						AND ID IN (:' . implode(',:', array_keys($bindings)) . ')';
 
 		$statement = $this->_db->prepare($query);
-		$statement->bindValue('element_type', 'post_post');
+        $statement->bindValue('post', 'post');
+        $statement->bindValue('page', 'page');
 		foreach ($bindings as $name => $param)
 			$statement->bindValue($name, $param['value'], $param['type']);
 
@@ -200,16 +201,16 @@ class Docs
 
 		// Better re-assemble this structure
 		$categories = array();
+		// Empty container
+		foreach ($ids as $id)
+            $categories[$id] = array('types' => array(), 'themes' => array(), 'regions' => array(), 'tags' => array());
 		foreach ($info as $item)
 		{
-			if (!isset($categories[$item['id']]))
-				$categories[$item['id']] = array('types' => array(), 'themes' => array(), 'regions' => array(), 'tags' => array());
-
 			if ('post_tag' == $item['type'])
 				$categories[$item['id']]['tags'][] = $item['label'];
 			else
 				$categories[$item['id']][$item['category']][] = array(
-																	'id'	=> $item['id'],
+																	'id'	=> $item['category_id'],
 																	'label'	=> $item['label'],
 																	);
 		}
@@ -261,9 +262,19 @@ class Docs
 									? $meta[$post['id']]['news_rss']
 									: '';
 
+			/*
+			Non conventional format... (aaaammgg)
 			$post['dateOfIssue'] = isset($meta[$post['id']]['data_pubblicazione'])
 									? $meta[$post['id']]['data_pubblicazione']
 									: $post['modified'];
+            */
+            if (isset($meta[$post['id']]['data_pubblicazione']))
+            {
+                $date = sscanf($meta[$post['id']]['data_pubblicazione'], '%04d%02d%02d', $Y, $m, $d); // Y, m, d, see date()
+                $post['dateOfIssue'] = mktime(9, 30, 0, (integer) $m, (integer) $d, (integer) $Y);
+            }
+            else
+                $post['dateOfIssue'] = $post['modified'];
 
 			$post['image'] = isset($meta[$post['id']]['image'])
 									? $meta[$post['id']]['image']
@@ -302,7 +313,7 @@ class Docs
 
 				// Attachments
 				$post['attachments'] = array();
-				$query = 'SELECT post_title as label, post_mime_type as mime_type, guid as url, post_type
+				$query = 'SELECT post_title as label, post_mime_type as mime_type, guid as url
 							FROM www_posts
 							WHERE post_type = :post_type
 								AND www_posts.post_parent = :post_parent
@@ -561,8 +572,8 @@ class Docs
 	 */
 	public function post($id)
 	{
-		$posts = $this->_posts(array($id), true);
-		return $posts[0];
+		if ($posts = $this->_posts(array($id), true))
+            return $posts[0];
 	}
 
 	/**
