@@ -797,8 +797,8 @@ class Docs
 		if ($limit >= 0)
 		{
 			$query .= ' LIMIT :offset, :limit';
-			$bindings['offset'] = array('value' => $offset, \PDO::PARAM_INT);
-			$bindings['limit'] = array('value' => $limit, \PDO::PARAM_INT);
+			$bindings['offset'] = array('value' => (integer) $offset, 'type' => \PDO::PARAM_INT);
+			$bindings['limit'] = array('value' => (integer) $limit, 'type' => \PDO::PARAM_INT);
 		}
 
 		// Preparation
