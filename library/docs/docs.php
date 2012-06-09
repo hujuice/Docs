@@ -732,9 +732,10 @@ class Docs
                 $names[] = $name;
                 $count++;
             }
-            $query = 'SELECT object_id
+            $query = 'SELECT www_term_relationships.object_id
                         FROM www_term_relationships
-                        WHERE term_taxonomy_id IN (:' . implode(',:', $names) . ')';
+                            LEFT JOIN www_term_taxonomy ON www_term_taxonomy.term_taxonomy_id = www_term_relationships.term_taxonomy_id
+                        WHERE www_term_taxonomy.term_id IN (:' . implode(',:', $names) . ')';
             $subquery = $this->_mountSubquery($query, 'post_id', $subquery);
         }
 
@@ -751,9 +752,10 @@ class Docs
                 $names[] = $name;
                 $count++;
             }
-            $query = 'SELECT object_id
+            $query = 'SELECT www_term_relationships.object_id
                         FROM www_term_relationships
-                        WHERE term_taxonomy_id IN (:' . implode(',:', $names) . ')';
+                            LEFT JOIN www_term_taxonomy ON www_term_taxonomy.term_taxonomy_id = www_term_relationships.term_taxonomy_id
+                        WHERE www_term_taxonomy.term_id IN (:' . implode(',:', $names) . ')';
             $subquery = $this->_mountSubquery($query, 'post_id', $subquery);
         }
 
@@ -770,9 +772,10 @@ class Docs
                 $names[] = $name;
                 $count++;
             }
-            $query = 'SELECT object_id
+            $query = 'SELECT www_term_relationships.object_id
                         FROM www_term_relationships
-                        WHERE term_taxonomy_id IN (:' . implode(',:', $names) . ')';
+                            LEFT JOIN www_term_taxonomy ON www_term_taxonomy.term_taxonomy_id = www_term_relationships.term_taxonomy_id
+                        WHERE www_term_taxonomy.term_id IN (:' . implode(',:', $names) . ')';
             $subquery = $this->_mountSubquery($query, 'post_id', $subquery);
         }
 
