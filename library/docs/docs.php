@@ -576,7 +576,7 @@ class Docs
      * @param string $lang Language
      * @param integer $offset Offset (starting from 0)
      * @param integer $limit Number of returned items ($limit <= 0 means 'no limit')
-     * @return array
+     * @return array Tags' list, with pounds
      */
     public function tags($lang, $offset = 0, $limit = 20)
     {
@@ -614,7 +614,7 @@ class Docs
      * Return the full content of a single post
      *
      * @param integer $id Post id
-     * @return array the complete ontology of the post, as complex array
+     * @return array The complete ontology of the post, as complex array
      */
     public function post($id)
     {
@@ -645,7 +645,7 @@ class Docs
      * @param integer $periodmax Data period not ending after this value (timestamp)
      * @param integer $offset Offset (starting from 0)
      * @param integer $limit Number of returned items ($limit <= 0 means 'no limit')
-     * @return array
+     * @return array The posts' list, as an array of items
      */
      public function lists(
                         $lang,
